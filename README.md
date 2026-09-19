@@ -1,464 +1,608 @@
+
 # MailFlow AI
 
-### AI-Powered Email & Document Processing Workflow
+### AI-Powered Document Intelligence & Workflow Automation
 
-MailFlow AI is an AI-powered document processing workflow that converts incoming email attachments into structured business data.
+MailFlow AI is an intelligent document-processing workflow designed to transform business documents received through email into structured, actionable information.
 
-The system monitors Gmail for emails containing attachments, extracts document content, uses AI to classify and extract key information, performs duplicate detection, and automatically records the processed information in Google Sheets.
+The system connects Gmail, document processing, AI-powered information extraction, duplicate detection, persistent data handling, and Google Sheets into a single automated pipeline.
 
-The project focuses on a practical engineering problem: turning unstructured documents received through email into structured, usable business data with minimal manual intervention.
+Rather than treating AI as an isolated capability, MailFlow AI places AI inside a complete operational workflow — from document intake to structured business output.
 
 ---
 
-## Why MailFlow AI?
-
-A large amount of business information still arrives through email as PDFs and other documents.
-
-A typical manual process looks like:
-
-```text
-Receive Email
-     ↓
-Download Attachment
-     ↓
-Open Document
-     ↓
-Read & Identify Information
-     ↓
-Classify Document
-     ↓
-Check Whether It Was Already Processed
-     ↓
-Enter Information Into Spreadsheet
-
-MailFlow AI automates this workflow:
-
-Gmail
-  ↓
-Attachment Detection
-  ↓
-Document Extraction
-  ↓
-AI Classification & Metadata Extraction
-  ↓
-Duplicate Detection
-  ↓
-Structured Data Storage
-  ↓
-Google Sheets
-
-System Architecture:
-                         MAILFLOW AI
-                              │
-                              ▼
-                    ┌──────────────────┐
-                    │      Gmail       │
-                    │ Email + Attach.  │
-                    └────────┬─────────┘
-                             │
-                             ▼
-                    ┌──────────────────┐
-                    │ Attachment       │
-                    │ Retrieval        │
-                    └────────┬─────────┘
-                             │
-                             ▼
-                    ┌──────────────────┐
-                    │ PDF Vector       │
-                    │ Document Parser  │
-                    └────────┬─────────┘
-                             │
-                             ▼
-                    ┌──────────────────┐
-                    │ Page Aggregation │
-                    │ & Text Assembly  │
-                    └────────┬─────────┘
-                             │
-                             ▼
-                    ┌──────────────────┐
-                    │ Make AI Toolkit  │
-                    │ AI Extraction    │
-                    └────────┬─────────┘
-                             │
-                   ┌─────────┴─────────┐
-                   │                   │
-                   ▼                   ▼
-          ┌────────────────┐   ┌─────────────────┐
-          │ Metadata       │   │ Duplicate Check │
-          │ Extraction     │   │ Data Store      │
-          └────────────────┘   └────────┬────────┘
-                                        │
-                                        ▼
-                               ┌─────────────────┐
-                               │ New Document?   │
-                               └────────┬────────┘
-                                        │
-                                        ▼
-                               ┌─────────────────┐
-                               │ Google Sheets   │
-                               │ Structured Data │
-                               └─────────────────┘
-Core Capabilities
-1. Automated Email Ingestion
-
-MailFlow AI monitors Gmail for incoming emails containing attachments.
-
-The workflow uses Gmail search criteria to identify messages with attachments.
-
-has:attachment
-
-This allows the workflow to operate continuously without requiring manual file uploads.
-
-2. Attachment Processing
-
-Once an email is detected, the workflow retrieves the available attachment data and passes it to the document-processing stage.
+## Overview
 
-The original email information can also be used later for metadata such as:
+Modern businesses receive large amounts of operational information through email. In many workflows, employees still need to open documents, understand their contents, identify important fields, check whether the document has already been processed, and manually enter the information into another system.
 
-Sender email
-Message ID
-Email timestamp
-Subject / filename information
-3. Document Content Extraction
+MailFlow AI explores how this process can be automated through a combination of document processing, AI extraction, workflow orchestration, and persistent data handling.
 
-The workflow uses PDF Vector to parse the document and produce machine-readable content.
+The core flow is:
 
-The extracted pages are then combined before being passed to the AI extraction stage.
+**Email → Document → Content → AI → Validation → Structured Data**
 
-PDF
- ↓
-Document Parser
- ↓
-Page Content
- ↓
-Aggregator
- ↓
-Combined Document Text
-4. AI-Powered Information Extraction
+The current implementation is built around Gmail, Make.com, document parsing, AI extraction, a Make Data Store, and Google Sheets.
 
-The extracted document content is passed to the Make AI Toolkit – Extract module.
+---
 
-The current workflow uses Gemini through the Make AI Toolkit.
+## The Problem
 
-The AI extraction schema contains:
+Document-heavy workflows commonly introduce several operational challenges:
 
-Field	Purpose
-client_company_name	Identifies the client/company mentioned in the document
-document_type	Identifies the financial/document category
-applicable_period	Identifies the relevant reporting period
-financial_year	Identifies the financial year when available
+* Repetitive manual document review
+* Manual extraction of important information
+* Repeated data entry
+* Unstructured document content
+* Duplicate records
+* Difficult document tracking
+* Time spent moving information between systems
 
-Example document categories supported by the extraction instructions include:
+The problem is not simply the presence of documents.
 
-Bank Statement
-Sales Invoice
-Purchase Invoice
-Expense Bill
-Other
+The larger challenge is the gap between **unstructured information** and **usable business data**.
 
-The purpose of this stage is to convert unstructured document content into structured information that downstream systems can use.
+MailFlow AI addresses that gap through an automated processing pipeline.
 
-Duplicate Detection & Data Integrity
+---
 
-One of the important engineering components of MailFlow AI is duplicate detection.
+## The Solution
 
-Without duplicate handling, repeatedly processing the same email or document could create duplicate records in the final data store.
+MailFlow AI receives document-based information through Gmail and processes it through a series of dedicated stages.
 
-The workflow creates a document key using:
+The workflow:
 
-Gmail Message ID
-        +
-MD5 hash of extracted document content
+**1. Detects incoming documents**
 
-The Data Store is used to check whether that key already exists.
+**2. Retrieves document content**
 
-Document
-   ↓
-Generate Key
-   ↓
-Check Data Store
-   ↓
-Already Exists?
-   │
-   ├── YES → Stop processing
-   │
-   └── NO
-        ↓
-   Store Record
-        ↓
-   Continue
-        ↓
-   Google Sheets
+**3. Parses the document**
 
-This introduces an important concept from production automation systems:
+**4. Aggregates extracted content**
 
-Idempotent processing
+**5. Uses AI to identify relevant business information**
 
-The workflow is designed so that previously processed documents do not repeatedly create new output records.
+**6. Checks for previously processed content**
 
-End-to-End Workflow
+**7. Maintains processing state**
 
-The current Make.com scenario consists of the following stages:
+**8. Creates a structured business record**
 
-01 — Gmail: Watch Emails
+This creates a repeatable path from incoming information to operational data.
 
-Monitors Gmail for new messages matching the configured search criteria.
+---
 
-Current search:
+# Architecture
 
-has:attachment
-02 — Gmail: Get / Process Attachments
+### High-Level System
 
-Retrieves attachment data from the detected email.
+**Gmail**
 
-03 — PDF Vector: Parse Document
+Incoming emails and attachments
 
-Processes the document and extracts its textual content.
+↓
 
-The current blueprint uses automatic model selection for the PDF Vector parser.
+**Document Processing**
 
-04 — Aggregator
+Retrieval and parsing
 
-Combines extracted page content into a single document representation.
+↓
 
-This allows the AI extraction stage to process the complete document rather than isolated pages.
+**Content Aggregation**
 
-05 — Make AI Toolkit: Extract
+Unified document representation
 
-The extracted document content is sent to the AI extraction layer.
+↓
 
-The current blueprint configures Gemini through Make AI Toolkit and extracts:
+**AI Extraction**
 
-client_company_name
-document_type
-applicable_period
-financial_year
-06 — Data Store: Check Duplicate
+Structured business information
 
-The workflow checks the generated document key against the:
+↓
 
-Client Document Deduplication
+**Duplicate Detection**
 
-Data Store.
+Content-based processing check
 
-07 — Data Store: Store Document Key
+↓
 
-If the document is new, its processing key and related metadata are stored.
+**Make Data Store**
 
-The workflow only continues when the duplicate check confirms that the document has not already been processed.
+Persistent processing state
 
-08 — Google Sheets: Save Result
+↓
 
-The extracted information is written into the configured Google Sheet.
+**Google Sheets**
 
-Structured Output
+Structured operational output
 
-The workflow writes processed document information into the:
+---
 
-Received Documents
+### Architecture Layers
 
-Google Sheets worksheet.
+**Input Layer**
 
-The current output schema is:
+Gmail provides the entry point for incoming business documents.
 
-Column	Description
-Client Name	AI-extracted client/company name
-Document Type	AI-classified document category
-Month / Period	Extracted applicable period
-Sender Email	Email sender
-Status	Current processing status
-File Name	Source email/attachment information
-Received At	Email received timestamp
+**Processing Layer**
 
-This creates a simple structured record that can later be connected to additional business systems.
+Document content is retrieved and parsed into machine-readable information.
 
-Technology Stack
-Technology	Role
-Make.com	Workflow orchestration
-Gmail	Email ingestion
-PDF Vector	Document parsing
-Make AI Toolkit	AI extraction
-Gemini	AI model used by the extraction layer
-Make Data Store	Duplicate detection and processing records
-Google Sheets	Structured output and tracking
-Engineering Concepts Demonstrated
+**Intelligence Layer**
 
-MailFlow AI is intentionally built around practical engineering concepts rather than simply demonstrating an AI model.
+The AI extraction stage analyzes the processed content and identifies predefined business fields.
 
-Event-Driven Processing
+**Validation Layer**
 
-The workflow begins when an email containing an attachment is detected.
+The workflow checks existing processing state to reduce duplicate records.
 
-Workflow Orchestration
+**Persistence Layer**
 
-Multiple services are connected into a single automated processing pipeline.
+The Make Data Store maintains information required for duplicate control.
 
-Unstructured → Structured Data
+**Output Layer**
 
-Documents are converted from raw content into structured business metadata.
+Google Sheets receives the final structured business record.
 
-AI-Assisted Extraction
+This separation allows individual stages to evolve independently as the system grows.
 
-AI is used for document classification and information extraction instead of relying entirely on manually defined rules.
+---
 
-Idempotent Processing
+# Workflow
 
-Duplicate detection prevents previously processed documents from repeatedly entering the output pipeline.
+## 01 — Email Detection
 
-Data Persistence
+The workflow monitors Gmail for incoming emails matching the configured attachment condition.
 
-The Make Data Store maintains processing information between workflow executions.
+The email provides important metadata such as:
 
-System Integration
+* Gmail message ID
+* Sender email
+* Subject
+* Received timestamp
+* Attachment-related content
 
-The project integrates multiple external systems:
+---
 
-Email
-+
-Document Processing
-+
-AI
-+
-Persistent Storage
-+
-Spreadsheet
+## 02 — Document Retrieval
 
-This makes the project representative of real-world business automation and integration engineering.
+The document content associated with the incoming email is retrieved and passed into the processing pipeline.
 
-Project Structure
-MailFlow AI/
-│
-├── blueprint.json
-├── README.md
-└── .gitignore
-blueprint.json
+This creates the transition from the email layer to the document intelligence layer.
 
-Contains the Make.com scenario blueprint used to recreate the workflow.
+---
 
-README.md
+## 03 — Document Parsing
 
-Contains the technical documentation, architecture, workflow explanation, and setup instructions.
+The current implementation processes PDF-based document content through the document parsing layer.
 
-.gitignore
+The parsed document is converted into machine-readable markdown that can be passed into subsequent processing stages.
 
-Prevents local configuration files, credentials, environment files, and other sensitive or unnecessary files from being committed.
+---
 
-Setup
-Requirements
+## 04 — Content Aggregation
 
-To recreate the workflow, you will need:
+Documents may contain multiple pages or extracted content sections.
 
-Make.com account
-Gmail account with appropriate access
-Google Sheets access
-PDF Vector access
-Make AI Toolkit access
-Gemini access through the configured AI integration
-Make Data Store
-Importing the Workflow
-Open Make.com.
-Create a new scenario.
-Import blueprint.json.
-Connect your Gmail account.
-Configure the document-processing connection.
-Configure the AI connection.
-Connect Google Sheets.
-Create/configure the required Data Store.
-Configure the output spreadsheet.
-Run a controlled test using an email containing a supported document.
+The workflow aggregates the available content into a unified representation before sending it to the AI extraction stage.
 
-Connection IDs and account-specific configuration from the original environment must be replaced with your own connections when importing the blueprint.
+This gives the AI layer broader document context instead of treating individual extracted sections as unrelated inputs.
 
-Potential Business Applications
+---
 
-The architecture can be adapted to business processes where documents regularly arrive through email.
+## 05 — AI Information Extraction
 
-Potential applications include:
+The aggregated document content is passed to the AI extraction module.
 
-Accounting document processing
-Invoice intake
-Client document collection
-Financial document organization
-Administrative workflows
-Procurement documentation
-Internal reporting
-Document-based operations
+The current extraction schema contains four primary fields:
 
-The workflow provides a foundation that can be extended with additional business systems and processing logic.
+| Field               | Purpose                                        |
+| ------------------- | ---------------------------------------------- |
+| Client Company Name | Identifies the relevant client or organization |
+| Document Type       | Identifies the category of document            |
+| Applicable Period   | Identifies the relevant month or period        |
+| Financial Year      | Identifies the associated financial year       |
 
-AmpleTech AI Relevance
+The workflow is currently configured with **Gemini 3.8 Flash** as the AI model.
 
-MailFlow AI represents the type of practical AI workflow engineering that can be applied to business operations.
+---
 
-The underlying approach is:
+## 06 — Duplicate Detection
 
-Understand the business process
-            ↓
-Identify repetitive manual work
-            ↓
-Design an automated workflow
-            ↓
-Integrate AI where it adds value
-            ↓
-Connect business systems
-            ↓
-Deploy a usable operational workflow
+Duplicate processing is controlled through a dedicated Make Data Store.
 
-This aligns with the broader engineering approach of AmpleTech AI:
+The workflow generates a processing key using:
 
-Consult. Engineer. Deploy AI systems.
+**Gmail Message ID + MD5 Hash of Extracted Document Content**
 
-Rather than treating AI as an isolated chatbot or model, the project demonstrates how AI can become part of an operational business process.
+The content hash provides a way to compare the processed document content against previously recorded processing information.
 
-Future Improvements
+This is designed to reduce unnecessary duplicate records and provide more controlled workflow execution.
 
-Potential extensions include:
+---
 
-Support for additional document formats
-More document classification categories
-Confidence scoring for AI extraction
-Human review for low-confidence results
-Error-handling and retry workflows
-Automated notifications
-Database integration
-CRM integration
-Accounting software integration
-Analytics dashboards
-More advanced document validation
-Multi-stage approval workflows
-What This Project Demonstrates
+## 07 — Data Persistence
 
-MailFlow AI demonstrates the ability to design and implement an AI-enabled workflow that connects:
+The Data Store maintains processing information associated with documents that have entered the workflow.
 
-Business Problem
-      ↓
-Workflow Design
-      ↓
-Email Ingestion
-      ↓
-Document Processing
-      ↓
-AI Extraction
-      ↓
-Data Validation
-      ↓
-Duplicate Detection
-      ↓
-Structured Output
+The stored information includes processing-related fields such as:
 
-The project is therefore useful as a practical demonstration of:
+**Gmail Message ID**
+**Content Hash**
+**Document Reference**
+**Received Timestamp**
+**Processing Status**
 
-AI engineering
-Automation engineering
-Workflow architecture
-API/service integration
-Document processing
-Data handling
-AI-assisted information extraction
-Business process automation
-License
+This provides persistent state that can be referenced during subsequent processing.
 
-License
+---
 
-This project is licensed under the MIT License
+## 08 — Structured Output
+
+After extraction and duplicate validation, the workflow records the processed information in Google Sheets.
+
+The current output structure contains:
+
+**Client Name**
+**Document Type**
+**Month / Period**
+**Sender Email**
+**Status**
+**File Name**
+**Received At**
+
+> The current workflow maps the **File Name** field from the email subject rather than the original attachment filename.
+
+---
+
+# Data Flow
+
+The complete processing lifecycle can be viewed as:
+
+**Unstructured Email**
+
+↓
+
+**Document Content**
+
+↓
+
+**Parsed Document**
+
+↓
+
+**Aggregated Content**
+
+↓
+
+**AI-Generated Structured Fields**
+
+↓
+
+**Duplicate Validation**
+
+↓
+
+**Persistent Processing Record**
+
+↓
+
+**Business Spreadsheet**
+
+This data flow is the core of MailFlow AI.
+
+It demonstrates how unstructured information can move through multiple processing stages before becoming structured operational data.
+
+---
+
+# AI Extraction Layer
+
+The AI component is not used simply as a conversational interface.
+
+It acts as an information extraction layer within a larger system.
+
+Its role is to take processed document content and identify predefined business attributes.
+
+This approach creates a clear boundary between:
+
+**Raw Information**
+
+and
+
+**Structured Business Information**
+
+That separation makes the workflow easier to extend with additional fields, validation rules, or downstream integrations.
+
+---
+
+# Data Integrity
+
+A major part of the workflow is ensuring that automation does not simply create more duplicate or inconsistent records.
+
+MailFlow AI therefore includes:
+
+**Persistent processing state**
+
+The Data Store remembers relevant processing information.
+
+**Content hashing**
+
+An MD5 hash is generated from the extracted document content.
+
+**Conditional processing**
+
+The workflow checks whether the relevant processing record already exists before adding a new record.
+
+Together, these mechanisms provide a foundation for controlled document processing.
+
+---
+
+# Technology Stack
+
+### Make.com
+
+Primary workflow orchestration platform connecting the individual processing stages.
+
+### Gmail
+
+Document intake and email monitoring layer.
+
+### Make AI Tools
+
+AI-powered information extraction from processed document content.
+
+### PDF Vector / Document Parser
+
+Document content extraction and parsing.
+
+### Make Data Store
+
+Persistent state and duplicate detection.
+
+### Google Sheets
+
+Structured business output and operational tracking.
+
+### Gemini 3.8 Flash
+
+AI model configured within the current extraction workflow.
+
+---
+
+# Engineering Concepts
+
+MailFlow AI brings together several practical engineering concepts:
+
+**AI Integration**
+
+Embedding AI into a larger software workflow rather than using the model independently.
+
+**Document Intelligence**
+
+Processing unstructured documents and extracting meaningful information.
+
+**Data Transformation**
+
+Converting raw document content into structured business fields.
+
+**Workflow Orchestration**
+
+Coordinating multiple services into a single processing pipeline.
+
+**Persistent State**
+
+Maintaining information across workflow executions.
+
+**Content Hashing**
+
+Using content-derived hashes as part of duplicate detection.
+
+**Conditional Processing**
+
+Allowing workflow execution to change based on previously stored state.
+
+**System Integration**
+
+Connecting AI capabilities with existing business tools.
+
+**Operational Automation**
+
+Replacing repetitive manual processes with an automated system.
+
+---
+
+# Why This Architecture
+
+The workflow is deliberately divided into independent stages instead of placing the entire process into one large automation block.
+
+This provides several advantages.
+
+### Separation of Responsibilities
+
+Each stage has a defined role:
+
+**Intake → Processing → Intelligence → Validation → Output**
+
+### Extensibility
+
+The current Google Sheets output could later be replaced or supplemented with other business systems.
+
+### Maintainability
+
+Individual processing stages can be modified without redesigning the entire workflow.
+
+### Business Adaptability
+
+The same architecture can be adapted for different document types, extraction schemas, and operational environments.
+
+The current implementation therefore serves as a foundation rather than a fixed end-state system.
+
+---
+
+# Business Applications
+
+The architecture can be adapted to several document-heavy business environments.
+
+### Accounting & Finance
+
+Client documents, invoices, statements, recurring financial records, and document collection workflows.
+
+### Professional Services
+
+Recurring client documentation, administrative processing, and structured client records.
+
+### Operations
+
+Internal document intake, operational tracking, and automated record creation.
+
+### Legal & Compliance
+
+Document classification, metadata extraction, and document tracking.
+
+### Human Resources
+
+Application documents, employee documentation, and structured information extraction.
+
+---
+
+# Current Scope
+
+The current implementation focuses on:
+
+**Gmail-based document intake**
+
+**PDF document processing**
+
+**AI-powered information extraction**
+
+**Duplicate detection**
+
+**Make Data Store persistence**
+
+**Google Sheets output**
+
+It is currently implemented as a working automation prototype rather than a fully independent production application.
+
+---
+
+# Future Roadmap
+
+The architecture provides a foundation for future development.
+
+### Document Intelligence
+
+* Additional document formats
+* Advanced document classification
+* More complex extraction schemas
+* Confidence scoring
+
+### Human Oversight
+
+* Human-in-the-loop validation
+* Exception handling
+* Review queues
+
+### Integrations
+
+* CRM systems
+* Databases
+* Cloud storage
+* Internal business applications
+
+### Operations
+
+* Monitoring dashboards
+* Error handling
+* Retry mechanisms
+* Processing analytics
+
+### AI Systems
+
+* More advanced LLM workflows
+* Context-aware extraction
+* Automated downstream decision-making
+* Multi-stage AI processing
+
+---
+
+# AmpleTech AI
+
+MailFlow AI reflects the engineering philosophy behind **AmpleTech AI — AI Consulting & Engineering**.
+
+AmpleTech AI focuses on identifying meaningful business problems, engineering practical AI systems around existing environments, and deploying those systems into real operational workflows.
+
+MailFlow AI represents that approach through a simple progression:
+
+**Consult**
+
+Identify where repetitive, document-heavy processes create operational friction.
+
+**Engineer**
+
+Design the AI workflow, processing logic, integrations, and data handling required to solve the problem.
+
+**Deploy**
+
+Connect the engineered system to the organization's existing tools and operational processes.
+
+### Consult. Engineer. Deploy AI systems.
+
+---
+
+# Setup
+
+The workflow can be recreated using the exported Make.com blueprint included in this repository.
+
+### Requirements
+
+**Make.com**
+
+**Gmail**
+
+**AI extraction connection**
+
+**Make Data Store**
+
+**Google Sheets**
+
+### Process
+
+Import the blueprint, configure the required service connections, create the required Data Store and Google Sheets structure, and test the workflow using representative documents.
+
+Authentication credentials, API keys, OAuth tokens, and private connection information must be configured independently and should never be committed to the repository.
+
+---
+
+# Project Structure
+
+**Mailflow-ai**
+
+`README.md`
+Project documentation and system overview
+
+`blueprint.json`
+Exported Make.com workflow blueprint
+
+`.gitignore`
+Repository and environment exclusions
+
+`LICENSE`
+MIT License
+
+---
+
+# Project Status
+
+### Working Prototype
+
+MailFlow AI currently implements the complete workflow from Gmail document intake through document processing, AI extraction, duplicate detection, and structured Google Sheets output.
+
+The architecture is intentionally designed so that additional document types, integrations, validation layers, and AI capabilities can be introduced over time.
+
+---
+
+# License
+
+This project is licensed under the MIT License.
+
+
 
