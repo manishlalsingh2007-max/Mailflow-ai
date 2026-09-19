@@ -1,0 +1,10 @@
+# Sensitive connection data removed from this blueprint before committing.
+# Connection IDs like __IMTCONN__ are specific to your Make.com account.
+# After importing, you will be prompted to reconnect your accounts.
+
+# Git
+.git/
+
+# OS
+.DS_Store
+Thumbs.db

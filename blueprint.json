@@ -1,0 +1,1636 @@
+{
+    "name": "Integration Gmail, Make AI Content Extractor, Make AI Toolkit, Data store, Google Sheets",
+    "flow": [
+        {
+            "id": 1,
+            "module": "google-email:triggerWatchNewEmails",
+            "version": 4,
+            "parameters": {
+                "__IMTCONN__": 10775790,
+                "filterType": "gmailSearch",
+                "format": "full",
+                "q": "has:attachment",
+                "markSeen": false,
+                "limit": 10
+            },
+            "mapper": {},
+            "metadata": {
+                "designer": {
+                    "x": 0,
+                    "y": 0
+                },
+                "restore": {
+                    "parameters": {
+                        "__IMTCONN__": {
+                            "label": "Sameer's Gmail connection"
+                        },
+                        "filterType": {
+                            "mode": "chose",
+                            "label": "Gmail filter",
+                            "nested": [
+                                {
+                                    "help": "Use Gmail search syntax, e.g. to search for messages in the Social category that include an attachment, use `category:social has:attachment`. For details, see the [Refine searches in Gmail](https://support.google.com/mail/answer/7190).",
+                                    "name": "q",
+                                    "type": "text",
+                                    "label": "Query",
+                                    "multiline": true
+                                },
+                                {
+                                    "name": "markSeen",
+                                    "type": "boolean",
+                                    "label": "Mark email message(s) as read when fetched",
+                                    "default": false
+                                },
+                                {
+                                    "help": "Maximum number of results to return and work with during one execution cycle. For information about setting limits, see our [Help Center](https://help.make.com/types-of-modules#module-limits).",
+                                    "name": "limit",
+                                    "type": "uinteger",
+                                    "label": "Limit",
+                                    "default": 10,
+                                    "required": true,
+                                    "validate": {
+                                        "max": 500
+                                    }
+                                }
+                            ]
+                        },
+                        "format": {
+                            "mode": "chose",
+                            "label": "Full content"
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "on": {
+                            "change": "reset_epoch"
+                        },
+                        "name": "__IMTCONN__",
+                        "type": "account:google-email",
+                        "label": "Connection",
+                        "required": true
+                    },
+                    {
+                        "name": "filterType",
+                        "type": "select",
+                        "label": "Filter type",
+                        "required": true,
+                        "validate": {
+                            "enum": [
+                                "simpleSearch",
+                                "gmailSearch"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "q",
+                        "type": "text",
+                        "label": "Query"
+                    },
+                    {
+                        "name": "markSeen",
+                        "type": "boolean",
+                        "label": "Mark email message(s) as read when fetched",
+                        "default": false
+                    },
+                    {
+                        "name": "limit",
+                        "type": "uinteger",
+                        "label": "Limit",
+                        "default": 10,
+                        "required": true,
+                        "validate": {
+                            "max": 500
+                        }
+                    },
+                    {
+                        "name": "format",
+                        "type": "select",
+                        "label": "Content format",
+                        "advanced": true,
+                        "required": true,
+                        "validate": {
+                            "enum": [
+                                "full",
+                                "raw",
+                                "metadata",
+                                "minimal"
+                            ]
+                        }
+                    }
+                ],
+                "interface": [
+                    {
+                        "name": "id",
+                        "type": "text",
+                        "label": "Message ID"
+                    },
+                    {
+                        "name": "threadId",
+                        "type": "text",
+                        "label": "Thread ID"
+                    },
+                    {
+                        "name": "internalDate",
+                        "type": "date",
+                        "label": "Date"
+                    },
+                    {
+                        "name": "subject",
+                        "type": "text",
+                        "label": "Subject",
+                        "condition": true
+                    },
+                    {
+                        "name": "fromName",
+                        "type": "text",
+                        "label": "From (name)",
+                        "condition": true
+                    },
+                    {
+                        "name": "fromEmail",
+                        "type": "text",
+                        "label": "From (email)",
+                        "condition": true
+                    },
+                    {
+                        "name": "to",
+                        "spec": {
+                            "spec": [
+                                {
+                                    "name": "name",
+                                    "type": "text",
+                                    "label": "Name"
+                                },
+                                {
+                                    "name": "email",
+                                    "type": "text",
+                                    "label": "Email"
+                                }
+                            ],
+                            "type": "collection"
+                        },
+                        "type": "array",
+                        "label": "To",
+                        "condition": true
+                    },
+                    {
+                        "name": "cc",
+                        "spec": [
+                            {
+                                "name": "email",
+                                "type": "email",
+                                "label": "Email"
+                            },
+                            {
+                                "name": "name",
+                                "type": "text",
+                                "label": "Name"
+                            }
+                        ],
+                        "type": "array",
+                        "label": "CC",
+                        "condition": true
+                    },
+                    {
+                        "name": "bcc",
+                        "spec": [
+                            {
+                                "name": "email",
+                                "type": "email",
+                                "label": "Email"
+                            },
+                            {
+                                "name": "name",
+                                "type": "text",
+                                "label": "Name"
+                            }
+                        ],
+                        "type": "array",
+                        "label": "BCC",
+                        "condition": true
+                    },
+                    {
+                        "name": "snippet",
+                        "type": "text",
+                        "label": "Snippet"
+                    },
+                    {
+                        "name": "fullTextBody",
+                        "type": "text",
+                        "label": "Full text body",
+                        "condition": true
+                    },
+                    {
+                        "name": "htmlBody",
+                        "type": "text",
+                        "label": "HTML body",
+                        "condition": true
+                    },
+                    {
+                        "name": "hasAttachment",
+                        "type": "boolean",
+                        "label": "Has attachment",
+                        "condition": true
+                    },
+                    {
+                        "name": "hasMedia",
+                        "type": "boolean",
+                        "label": "Has media",
+                        "condition": true
+                    },
+                    {
+                        "name": "sysFolders",
+                        "spec": [
+                            {
+                                "name": "id",
+                                "type": "text",
+                                "label": "System folder ID"
+                            },
+                            {
+                                "name": "name",
+                                "type": "text",
+                                "label": "System folder name"
+                            }
+                        ],
+                        "type": "array",
+                        "label": "System folders"
+                    },
+                    {
+                        "name": "categoryFolders",
+                        "spec": [
+                            {
+                                "name": "id",
+                                "type": "text",
+                                "label": "Category folder ID"
+                            },
+                            {
+                                "name": "name",
+                                "type": "text",
+                                "label": "Category folder name"
+                            }
+                        ],
+                        "type": "array",
+                        "label": "Category folders"
+                    },
+                    {
+                        "name": "userLabelFolders",
+                        "spec": [
+                            {
+                                "name": "id",
+                                "type": "text",
+                                "label": "User label folder ID"
+                            },
+                            {
+                                "name": "name",
+                                "type": "text",
+                                "label": "User label folder name"
+                            }
+                        ],
+                        "type": "array",
+                        "label": "User label folders"
+                    },
+                    {
+                        "name": "labelIds",
+                        "spec": {
+                            "type": "text"
+                        },
+                        "type": "array",
+                        "label": "Message folder IDs"
+                    },
+                    {
+                        "name": "headers",
+                        "spec": [
+                            {
+                                "name": "Delivered-To",
+                                "type": "text",
+                                "label": "Delivered-To"
+                            },
+                            {
+                                "name": "Received",
+                                "type": "text",
+                                "label": "Received"
+                            },
+                            {
+                                "name": "Date",
+                                "type": "text",
+                                "label": "Date (header)"
+                            },
+                            {
+                                "name": "X-Original-Sender",
+                                "type": "text"
+                            },
+                            {
+                                "name": "Reply-To",
+                                "type": "text"
+                            },
+                            {
+                                "name": "Subject",
+                                "type": "text",
+                                "label": "Subject"
+                            },
+                            {
+                                "name": "From",
+                                "type": "text",
+                                "label": "From"
+                            },
+                            {
+                                "name": "To",
+                                "type": "text",
+                                "label": "To"
+                            },
+                            {
+                                "name": "Message-ID",
+                                "type": "text",
+                                "label": "Message-ID"
+                            },
+                            {
+                                "name": "In-Reply-To",
+                                "type": "text",
+                                "label": "In-Reply-To"
+                            }
+                        ],
+                        "type": "collection",
+                        "label": "Headers",
+                        "condition": true
+                    },
+                    {
+                        "name": "sizeEstimate",
+                        "type": "number",
+                        "label": "Size estimate"
+                    },
+                    {
+                        "name": "historyId",
+                        "type": "text",
+                        "label": "History ID"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 2,
+            "module": "google-email:listEmailAttachments",
+            "version": 4,
+            "parameters": {
+                "__IMTCONN__": 10775790
+            },
+            "mapper": {
+                "messageId": "{{1.id}}",
+                "include": [
+                    "attachment"
+                ],
+                "returnAttachmentData": true
+            },
+            "metadata": {
+                "designer": {
+                    "x": 300,
+                    "y": 0,
+                    "name": "List Attachments"
+                },
+                "restore": {
+                    "parameters": {
+                        "__IMTCONN__": {
+                            "label": "Sameer's Gmail connection"
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "__IMTCONN__",
+                        "type": "account:google-email",
+                        "label": "Connection",
+                        "required": true
+                    }
+                ],
+                "expect": [
+                    {
+                        "name": "messageId",
+                        "type": "text",
+                        "label": "Message ID",
+                        "required": true
+                    },
+                    {
+                        "name": "include",
+                        "type": "select",
+                        "label": "Include",
+                        "default": [
+                            "media",
+                            "attachment"
+                        ],
+                        "multiple": true,
+                        "required": true,
+                        "validate": {
+                            "enum": [
+                                "attachment",
+                                "media"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "returnAttachmentData",
+                        "type": "boolean",
+                        "label": "Return media or attachment file data",
+                        "default": true,
+                        "advanced": true,
+                        "mappable": false,
+                        "required": true
+                    }
+                ]
+            }
+        },
+        {
+            "id": 9,
+            "module": "pdf-vector:parseDocument",
+            "version": 1,
+            "parameters": {
+                "__IMTCONN__": 10777186
+            },
+            "mapper": {
+                "file": "{{2.data}}",
+                "fileName": "{{2.filename}}",
+                "model": "auto",
+                "includePages": false
+            },
+            "metadata": {
+                "designer": {
+                    "x": 600,
+                    "y": 0
+                },
+                "restore": {
+                    "parameters": {
+                        "__IMTCONN__": {
+                            "label": "Sameer's PDF Vector connection"
+                        }
+                    },
+                    "expect": {
+                        "model": {
+                            "mode": "chose",
+                            "label": "Auto (recommended)"
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "__IMTCONN__",
+                        "type": "account:pdf-vector",
+                        "label": "Connection",
+                        "required": true
+                    }
+                ],
+                "expect": [
+                    {
+                        "name": "url",
+                        "type": "url",
+                        "label": "Document URL",
+                        "required": false
+                    },
+                    {
+                        "name": "file",
+                        "type": "buffer",
+                        "label": "File",
+                        "required": false,
+                        "semantic": "file:data"
+                    },
+                    {
+                        "name": "fileName",
+                        "type": "filename",
+                        "label": "File Name",
+                        "required": false,
+                        "semantic": "file:name"
+                    },
+                    {
+                        "name": "model",
+                        "type": "select",
+                        "label": "Model",
+                        "default": "auto",
+                        "required": false,
+                        "validate": {
+                            "enum": [
+                                "auto",
+                                "nano",
+                                "mini",
+                                "pro",
+                                "max"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "includePages",
+                        "type": "boolean",
+                        "label": "Page-separated output",
+                        "required": false
+                    }
+                ]
+            }
+        },
+        {
+            "id": 8,
+            "module": "builtin:BasicAggregator",
+            "version": 1,
+            "parameters": {
+                "feeder": 2
+            },
+            "filter": null,
+            "mapper": {
+                "markdown": "{{9.markdown}}"
+            },
+            "metadata": {
+                "designer": {
+                    "x": 900,
+                    "y": 0
+                },
+                "restore": {}
+            },
+            "flags": {
+                "stopIfEmpty": true
+            }
+        },
+        {
+            "id": 4,
+            "module": "ai-tools:Extract",
+            "version": 2,
+            "parameters": {
+                "makeConnectionId": 10776298,
+                "model": "gemini-3.8-flash"
+            },
+            "mapper": {
+                "input": "{{join(map(8.array; \"markdown\"); newline)}}",
+                "fields": [
+                    {
+                        "name": "client_company_name",
+                        "description": "The client company name shown in the document or sender-provided document content.",
+                        "type": "string"
+                    },
+                    {
+                        "name": "document_type",
+                        "description": "The financial document category, such as Bank Statement, Sales Invoice, Purchase Invoice, Expense Bill, or Other.",
+                        "type": "string"
+                    },
+                    {
+                        "name": "applicable_period",
+                        "description": "The month, quarter, year, or other financial period that this document covers, normalized when possible.",
+                        "type": "string"
+                    },
+                    {
+                        "name": "financial_year",
+                        "description": "The financial year mentioned in the document, if available.",
+                        "type": "string"
+                    }
+                ]
+            },
+            "metadata": {
+                "designer": {
+                    "x": 1200,
+                    "y": 0,
+                    "name": "Classify Document"
+                },
+                "restore": {
+                    "parameters": {
+                        "makeConnectionId": {
+                            "label": "Sameer's Gemini AI connection"
+                        },
+                        "model": {
+                            "mode": "chose",
+                            "label": "Gemini 3.8 Flash",
+                            "nested": []
+                        }
+                    },
+                    "expect": {
+                        "fields": {
+                            "items": [
+                                {
+                                    "type": {
+                                        "mode": "chose",
+                                        "label": "Text"
+                                    }
+                                },
+                                {
+                                    "type": {
+                                        "mode": "chose",
+                                        "label": "Text"
+                                    }
+                                },
+                                {
+                                    "type": {
+                                        "mode": "chose",
+                                        "label": "Text"
+                                    }
+                                },
+                                {
+                                    "type": {
+                                        "mode": "chose",
+                                        "label": "Text"
+                                    }
+                                }
+                            ],
+                            "mode": "chose"
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "makeConnectionId",
+                        "type": "account:ai-provider,openai-gpt-3,anthropic-claude,gemini-ai-q9zyjp,ai-agent-foundry-openai,ai-agent-foundry-non-openai,mistral-ai,cohere,groq,ai-agent-xai,amazon-bedrock,ai-agent-openai-compatible",
+                        "label": "Connection",
+                        "required": true
+                    },
+                    {
+                        "name": "model",
+                        "type": "select",
+                        "label": "Model",
+                        "required": true,
+                        "mappable": true,
+                        "grouped": true,
+                        "forceReload": true
+                    }
+                ],
+                "expect": [
+                    {
+                        "name": "input",
+                        "label": "Text",
+                        "type": "text",
+                        "required": true
+                    },
+                    {
+                        "name": "fields",
+                        "label": "Information",
+                        "type": "array",
+                        "required": true,
+                        "spec": {
+                            "type": "collection",
+                            "label": "Information",
+                            "spec": [
+                                {
+                                    "name": "name",
+                                    "type": "text",
+                                    "label": "Name",
+                                    "required": true
+                                },
+                                {
+                                    "name": "description",
+                                    "type": "text",
+                                    "label": "Description",
+                                    "required": true
+                                },
+                                {
+                                    "name": "type",
+                                    "type": "select",
+                                    "label": "Type",
+                                    "required": true,
+                                    "validate": {
+                                        "enum": [
+                                            "string",
+                                            "number",
+                                            "boolean"
+                                        ]
+                                    }
+                                }
+                            ]
+                        },
+                        "labels": {
+                            "add": "Add information"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "id": 5,
+            "module": "datastore:ExistRecord",
+            "version": 1,
+            "parameters": {
+                "datastore": 185424
+            },
+            "mapper": {
+                "key": "{{1.id}}|{{md5(join(map(8.array; \"markdown\"); newline))}}"
+            },
+            "metadata": {
+                "designer": {
+                    "x": 1500,
+                    "y": 0,
+                    "name": "Check Duplicate"
+                },
+                "restore": {
+                    "parameters": {
+                        "datastore": {
+                            "label": "Client Document Deduplication"
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "datastore",
+                        "label": "Data store",
+                        "type": "datastore",
+                        "required": true
+                    }
+                ],
+                "expect": [
+                    {
+                        "name": "key",
+                        "label": "Key",
+                        "type": "text",
+                        "required": true
+                    }
+                ]
+            }
+        },
+        {
+            "id": 6,
+            "module": "datastore:AddRecord",
+            "version": 1,
+            "parameters": {
+                "datastore": 185424
+            },
+            "filter": {
+                "name": "Only new documents",
+                "conditions": [
+                    [
+                        {
+                            "a": "{{5.exist}}",
+                            "o": "boolean:equal",
+                            "b": "false"
+                        }
+                    ]
+                ]
+            },
+            "mapper": {
+                "key": "{{1.id}}|{{md5(join(map(8.array; \"markdown\"); newline))}}",
+                "overwrite": false,
+                "data": {
+                    "gmailMessageId": "{{1.id}}",
+                    "attachmentId": "{{md5(join(map(8.array; \"markdown\"); newline))}}",
+                    "filename": "{{1.subject}}",
+                    "receivedAt": "{{1.internalDate}}",
+                    "status": "Received"
+                }
+            },
+            "metadata": {
+                "designer": {
+                    "x": 1800,
+                    "y": 0,
+                    "name": "Store Document Key"
+                },
+                "restore": {
+                    "parameters": {
+                        "datastore": {
+                            "label": "Client Document Deduplication"
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "datastore",
+                        "label": "Data store",
+                        "type": "datastore",
+                        "required": true
+                    }
+                ],
+                "expect": [
+                    {
+                        "name": "key",
+                        "label": "Key",
+                        "type": "text"
+                    },
+                    {
+                        "name": "overwrite",
+                        "label": "Overwrite an existing record",
+                        "type": "boolean",
+                        "required": true,
+                        "default": false
+                    },
+                    {
+                        "name": "data",
+                        "type": "collection",
+                        "label": "Record",
+                        "spec": [
+                            {
+                                "name": "gmailMessageId",
+                                "type": "text",
+                                "label": "Gmail message ID",
+                                "required": false
+                            },
+                            {
+                                "name": "attachmentId",
+                                "type": "text",
+                                "label": "Attachment ID",
+                                "required": false
+                            },
+                            {
+                                "name": "filename",
+                                "type": "text",
+                                "label": "Filename",
+                                "required": false
+                            },
+                            {
+                                "name": "receivedAt",
+                                "type": "date",
+                                "label": "Received at",
+                                "required": false
+                            },
+                            {
+                                "name": "status",
+                                "type": "text",
+                                "label": "Status",
+                                "required": false
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": 7,
+            "module": "google-sheets:addRow",
+            "version": 2,
+            "parameters": {
+                "__IMTCONN__": 10776357
+            },
+            "mapper": {
+                "mode": "select",
+                "from": "drive",
+                "spreadsheetId": "19_bPN3AyZbUNJTAZizW8w7icu6tJUTVfa9RTaqlZKP8",
+                "sheetId": "Received Documents",
+                "includesHeaders": true,
+                "useColumnHeaders": true,
+                "insertUnformatted": false,
+                "valueInputOption": "USER_ENTERED",
+                "values": {
+                    "Client Name": "{{4.information.client_company_name}}",
+                    "Document Type": "{{4.information.document_type}}",
+                    "Month / Period": "{{4.information.applicable_period}}",
+                    "Sender Email": "{{1.fromEmail}}",
+                    "Status": "Received",
+                    "File Name": "{{1.subject}}",
+                    "Received At": "{{1.internalDate}}"
+                }
+            },
+            "metadata": {
+                "designer": {
+                    "x": 2100,
+                    "y": 0,
+                    "name": "Save Received Document"
+                },
+                "restore": {
+                    "parameters": {
+                        "__IMTCONN__": {
+                            "label": "Sameer's Google connection"
+                        }
+                    },
+                    "expect": {
+                        "mode": {
+                            "mode": "chose",
+                            "label": "Search by path",
+                            "nested": [
+                                {
+                                    "name": "from",
+                                    "type": "select",
+                                    "label": "Drive",
+                                    "options": [
+                                        {
+                                            "label": "My Drive",
+                                            "value": "drive",
+                                            "nested": [
+                                                {
+                                                    "name": "spreadsheetId",
+                                                    "type": "file",
+                                                    "label": "Spreadsheet Name",
+                                                    "options": {
+                                                        "ids": true,
+                                                        "store": "rpc://google-sheets@2/listSpreadsheets",
+                                                        "nested": [
+                                                            {
+                                                                "name": "sheetId",
+                                                                "type": "select",
+                                                                "label": "Sheet Name",
+                                                                "options": {
+                                                                    "store": "rpc://google-sheets@2/rpcSheet",
+                                                                    "nested": [
+                                                                        {
+                                                                            "name": "includesHeaders",
+                                                                            "type": "select",
+                                                                            "label": "Table contains headers",
+                                                                            "default": true,
+                                                                            "options": [
+                                                                                {
+                                                                                    "label": "Yes",
+                                                                                    "value": true,
+                                                                                    "nested": [
+                                                                                        {
+                                                                                            "help": "When enabled, column header names are used as stable IDs. This protects mappings when columns are added, removed, or reordered in the table. Leave it disabled if you need the module to continue working when columns are renamed (in which case, column position will be used as the ID).",
+                                                                                            "name": "useColumnHeaders",
+                                                                                            "type": "select",
+                                                                                            "label": "Use column headers as IDs of the columns",
+                                                                                            "nested": [
+                                                                                                "rpc://google-sheets@2/rpcSheetInput"
+                                                                                            ],
+                                                                                            "default": false,
+                                                                                            "options": [
+                                                                                                {
+                                                                                                    "label": "Yes",
+                                                                                                    "value": true
+                                                                                                },
+                                                                                                {
+                                                                                                    "label": "No",
+                                                                                                    "value": false
+                                                                                                }
+                                                                                            ],
+                                                                                            "mappable": false,
+                                                                                            "required": true
+                                                                                        }
+                                                                                    ]
+                                                                                },
+                                                                                {
+                                                                                    "label": "No",
+                                                                                    "value": false,
+                                                                                    "nested": [
+                                                                                        {
+                                                                                            "help": "Please select the column range you want to work with.",
+                                                                                            "name": "tableFirstRow",
+                                                                                            "type": "select",
+                                                                                            "label": "Column range",
+                                                                                            "options": [
+                                                                                                {
+                                                                                                    "label": "A-Z",
+                                                                                                    "value": "A1:Z1",
+                                                                                                    "nested": "rpc://google-sheets@2/rpcSheetInput"
+                                                                                                },
+                                                                                                {
+                                                                                                    "label": "A-BZ",
+                                                                                                    "value": "A1:BZ1",
+                                                                                                    "nested": "rpc://google-sheets@2/rpcSheetInput"
+                                                                                                },
+                                                                                                {
+                                                                                                    "label": "A-CZ",
+                                                                                                    "value": "A1:CZ1",
+                                                                                                    "nested": "rpc://google-sheets@2/rpcSheetInput"
+                                                                                                },
+                                                                                                {
+                                                                                                    "label": "A-DZ",
+                                                                                                    "value": "A1:DZ1",
+                                                                                                    "nested": "rpc://google-sheets@2/rpcSheetInput"
+                                                                                                },
+                                                                                                {
+                                                                                                    "label": "A-MZ",
+                                                                                                    "value": "A1:MZ1",
+                                                                                                    "nested": "rpc://google-sheets@2/rpcSheetInput"
+                                                                                                },
+                                                                                                {
+                                                                                                    "label": "A-ZZ",
+                                                                                                    "value": "A1:ZZ1",
+                                                                                                    "nested": "rpc://google-sheets@2/rpcSheetInput"
+                                                                                                }
+                                                                                            ],
+                                                                                            "mappable": false,
+                                                                                            "required": true
+                                                                                        }
+                                                                                    ]
+                                                                                }
+                                                                            ],
+                                                                            "mappable": false,
+                                                                            "required": true
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                "mappable": false,
+                                                                "required": true
+                                                            }
+                                                        ]
+                                                    },
+                                                    "mappable": false,
+                                                    "required": true
+                                                }
+                                            ],
+                                            "default": true
+                                        },
+                                        {
+                                            "label": "Shared with me",
+                                            "value": "share",
+                                            "nested": [
+                                                {
+                                                    "name": "spreadsheetId",
+                                                    "type": "file",
+                                                    "label": "Spreadsheet Name",
+                                                    "options": {
+                                                        "ids": true,
+                                                        "store": "rpc://google-sheets@2/listSpreadsheets?share=true",
+                                                        "nested": [
+                                                            {
+                                                                "name": "sheetId",
+                                                                "type": "select",
+                                                                "label": "Sheet Name",
+                                                                "options": {
+                                                                    "store": "rpc://google-sheets@2/rpcSheet",
+                                                                    "nested": [
+                                                                        {
+                                                                            "name": "includesHeaders",
+                                                                            "type": "select",
+                                                                            "label": "Table contains headers",
+                                                                            "default": true,
+                                                                            "options": [
+                                                                                {
+                                                                                    "label": "Yes",
+                                                                                    "value": true,
+                                                                                    "nested": [
+                                                                                        {
+                                                                                            "help": "When enabled, column headers are used as IDs. This allows the module to continue working even if new columns are inserted into the table, without needing to remap values.",
+                                                                                            "name": "useColumnHeaders",
+                                                                                            "type": "select",
+                                                                                            "label": "Use column headers as IDs of the columns",
+                                                                                            "nested": [
+                                                                                                "rpc://google-sheets@2/rpcSheetInput"
+                                                                                            ],
+                                                                                            "default": false,
+                                                                                            "options": [
+                                                                                                {
+                                                                                                    "label": "Yes",
+                                                                                                    "value": true
+                                                                                                },
+                                                                                                {
+                                                                                                    "label": "No",
+                                                                                                    "value": false
+                                                                                                }
+                                                                                            ],
+                                                                                            "mappable": false,
+                                                                                            "required": true
+                                                                                        }
+                                                                                    ]
+                                                                                },
+                                                                                {
+                                                                                    "label": "No",
+                                                                                    "value": false,
+                                                                                    "nested": [
+                                                                                        {
+                                                                                            "help": "Please select the column range you want to work with.",
+                                                                                            "name": "tableFirstRow",
+                                                                                            "type": "select",
+                                                                                            "label": "Column range",
+                                                                                            "options": [
+                                                                                                {
+                                                                                                    "label": "A-Z",
+                                                                                                    "value": "A1:Z1",
+                                                                                                    "nested": "rpc://google-sheets@2/rpcSheetInput"
+                                                                                                },
+                                                                                                {
+                                                                                                    "label": "A-BZ",
+                                                                                                    "value": "A1:BZ1",
+                                                                                                    "nested": "rpc://google-sheets@2/rpcSheetInput"
+                                                                                                },
+                                                                                                {
+                                                                                                    "label": "A-CZ",
+                                                                                                    "value": "A1:CZ1",
+                                                                                                    "nested": "rpc://google-sheets@2/rpcSheetInput"
+                                                                                                },
+                                                                                                {
+                                                                                                    "label": "A-DZ",
+                                                                                                    "value": "A1:DZ1",
+                                                                                                    "nested": "rpc://google-sheets@2/rpcSheetInput"
+                                                                                                },
+                                                                                                {
+                                                                                                    "label": "A-MZ",
+                                                                                                    "value": "A1:MZ1",
+                                                                                                    "nested": "rpc://google-sheets@2/rpcSheetInput"
+                                                                                                },
+                                                                                                {
+                                                                                                    "label": "A-ZZ",
+                                                                                                    "value": "A1:ZZ1",
+                                                                                                    "nested": "rpc://google-sheets@2/rpcSheetInput"
+                                                                                                }
+                                                                                            ],
+                                                                                            "mappable": false,
+                                                                                            "required": true
+                                                                                        }
+                                                                                    ]
+                                                                                }
+                                                                            ],
+                                                                            "mappable": false,
+                                                                            "required": true
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                "mappable": false,
+                                                                "required": true
+                                                            }
+                                                        ]
+                                                    },
+                                                    "mappable": false,
+                                                    "required": true
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "label": "Google Shared Drive",
+                                            "value": "team",
+                                            "nested": [
+                                                {
+                                                    "help": "Issue the request as a domain administrator\nIf set to`Yes`, then all shared drives of the domain in which the requester is an administrator are returned.",
+                                                    "name": "useDomainAdminAccess",
+                                                    "type": "select",
+                                                    "label": "Use Domain Admin Access",
+                                                    "options": {
+                                                        "store": [
+                                                            {
+                                                                "label": "Yes",
+                                                                "value": true
+                                                            },
+                                                            {
+                                                                "label": "No",
+                                                                "value": false,
+                                                                "default": true
+                                                            }
+                                                        ],
+                                                        "nested": [
+                                                            {
+                                                                "name": "sharedDrive",
+                                                                "type": "select",
+                                                                "label": "Shared Drive",
+                                                                "options": {
+                                                                    "store": "rpc://google-sheets@2/listSharedDrives",
+                                                                    "nested": [
+                                                                        {
+                                                                            "name": "spreadsheetId",
+                                                                            "type": "file",
+                                                                            "label": "Spreadsheet Name",
+                                                                            "options": {
+                                                                                "ids": true,
+                                                                                "store": "rpc://google-sheets@2/listTeamSpreadsheets",
+                                                                                "nested": [
+                                                                                    {
+                                                                                        "name": "sheetId",
+                                                                                        "type": "select",
+                                                                                        "label": "Sheet Name",
+                                                                                        "options": {
+                                                                                            "store": "rpc://google-sheets@2/rpcSheet",
+                                                                                            "nested": [
+                                                                                                {
+                                                                                                    "name": "includesHeaders",
+                                                                                                    "type": "select",
+                                                                                                    "label": "Table contains headers",
+                                                                                                    "default": true,
+                                                                                                    "options": [
+                                                                                                        {
+                                                                                                            "label": "Yes",
+                                                                                                            "value": true,
+                                                                                                            "nested": [
+                                                                                                                {
+                                                                                                                    "help": "When enabled, column headers are used as IDs. This allows the module to continue working even if new columns are inserted into the table, without needing to remap values.",
+                                                                                                                    "name": "useColumnHeaders",
+                                                                                                                    "type": "select",
+                                                                                                                    "label": "Use column headers as IDs of the columns",
+                                                                                                                    "nested": [
+                                                                                                                        "rpc://google-sheets@2/rpcSheetInput"
+                                                                                                                    ],
+                                                                                                                    "default": false,
+                                                                                                                    "options": [
+                                                                                                                        {
+                                                                                                                            "label": "Yes",
+                                                                                                                            "value": true
+                                                                                                                        },
+                                                                                                                        {
+                                                                                                                            "label": "No",
+                                                                                                                            "value": false
+                                                                                                                        }
+                                                                                                                    ],
+                                                                                                                    "mappable": false,
+                                                                                                                    "required": true
+                                                                                                                }
+                                                                                                            ]
+                                                                                                        },
+                                                                                                        {
+                                                                                                            "label": "No",
+                                                                                                            "value": false,
+                                                                                                            "nested": [
+                                                                                                                {
+                                                                                                                    "help": "Please select the column range you want to work with.",
+                                                                                                                    "name": "tableFirstRow",
+                                                                                                                    "type": "select",
+                                                                                                                    "label": "Column range",
+                                                                                                                    "options": [
+                                                                                                                        {
+                                                                                                                            "label": "A-Z",
+                                                                                                                            "value": "A1:Z1",
+                                                                                                                            "nested": "rpc://google-sheets@2/rpcSheetInput"
+                                                                                                                        },
+                                                                                                                        {
+                                                                                                                            "label": "A-BZ",
+                                                                                                                            "value": "A1:BZ1",
+                                                                                                                            "nested": "rpc://google-sheets@2/rpcSheetInput"
+                                                                                                                        },
+                                                                                                                        {
+                                                                                                                            "label": "A-CZ",
+                                                                                                                            "value": "A1:CZ1",
+                                                                                                                            "nested": "rpc://google-sheets@2/rpcSheetInput"
+                                                                                                                        },
+                                                                                                                        {
+                                                                                                                            "label": "A-DZ",
+                                                                                                                            "value": "A1:DZ1",
+                                                                                                                            "nested": "rpc://google-sheets@2/rpcSheetInput"
+                                                                                                                        },
+                                                                                                                        {
+                                                                                                                            "label": "A-MZ",
+                                                                                                                            "value": "A1:MZ1",
+                                                                                                                            "nested": "rpc://google-sheets@2/rpcSheetInput"
+                                                                                                                        },
+                                                                                                                        {
+                                                                                                                            "label": "A-ZZ",
+                                                                                                                            "value": "A1:ZZ1",
+                                                                                                                            "nested": "rpc://google-sheets@2/rpcSheetInput"
+                                                                                                                        }
+                                                                                                                    ],
+                                                                                                                    "mappable": false,
+                                                                                                                    "required": true
+                                                                                                                }
+                                                                                                            ]
+                                                                                                        }
+                                                                                                    ],
+                                                                                                    "mappable": false,
+                                                                                                    "required": true
+                                                                                                }
+                                                                                            ]
+                                                                                        },
+                                                                                        "mappable": false,
+                                                                                        "required": true
+                                                                                    }
+                                                                                ]
+                                                                            },
+                                                                            "mappable": false,
+                                                                            "required": true
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                "mappable": false,
+                                                                "required": true
+                                                            }
+                                                        ]
+                                                    },
+                                                    "mappable": false,
+                                                    "required": true
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "mappable": false,
+                                    "required": true
+                                }
+                            ]
+                        },
+                        "from": {
+                            "mode": "chose",
+                            "label": "My Drive",
+                            "nested": [
+                                {
+                                    "name": "spreadsheetId",
+                                    "type": "file",
+                                    "label": "Spreadsheet Name",
+                                    "options": {
+                                        "ids": true,
+                                        "store": "rpc://google-sheets@2/listSpreadsheets",
+                                        "nested": [
+                                            {
+                                                "name": "sheetId",
+                                                "type": "select",
+                                                "label": "Sheet Name",
+                                                "options": {
+                                                    "store": "rpc://google-sheets@2/rpcSheet",
+                                                    "nested": [
+                                                        {
+                                                            "name": "includesHeaders",
+                                                            "type": "select",
+                                                            "label": "Table contains headers",
+                                                            "default": true,
+                                                            "options": [
+                                                                {
+                                                                    "label": "Yes",
+                                                                    "value": true,
+                                                                    "nested": [
+                                                                        {
+                                                                            "help": "When enabled, column header names are used as stable IDs. This protects mappings when columns are added, removed, or reordered in the table. Leave it disabled if you need the module to continue working when columns are renamed (in which case, column position will be used as the ID).",
+                                                                            "name": "useColumnHeaders",
+                                                                            "type": "select",
+                                                                            "label": "Use column headers as IDs of the columns",
+                                                                            "nested": [
+                                                                                "rpc://google-sheets@2/rpcSheetInput"
+                                                                            ],
+                                                                            "default": false,
+                                                                            "options": [
+                                                                                {
+                                                                                    "label": "Yes",
+                                                                                    "value": true
+                                                                                },
+                                                                                {
+                                                                                    "label": "No",
+                                                                                    "value": false
+                                                                                }
+                                                                            ],
+                                                                            "mappable": false,
+                                                                            "required": true
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "label": "No",
+                                                                    "value": false,
+                                                                    "nested": [
+                                                                        {
+                                                                            "help": "Please select the column range you want to work with.",
+                                                                            "name": "tableFirstRow",
+                                                                            "type": "select",
+                                                                            "label": "Column range",
+                                                                            "options": [
+                                                                                {
+                                                                                    "label": "A-Z",
+                                                                                    "value": "A1:Z1",
+                                                                                    "nested": "rpc://google-sheets@2/rpcSheetInput"
+                                                                                },
+                                                                                {
+                                                                                    "label": "A-BZ",
+                                                                                    "value": "A1:BZ1",
+                                                                                    "nested": "rpc://google-sheets@2/rpcSheetInput"
+                                                                                },
+                                                                                {
+                                                                                    "label": "A-CZ",
+                                                                                    "value": "A1:CZ1",
+                                                                                    "nested": "rpc://google-sheets@2/rpcSheetInput"
+                                                                                },
+                                                                                {
+                                                                                    "label": "A-DZ",
+                                                                                    "value": "A1:DZ1",
+                                                                                    "nested": "rpc://google-sheets@2/rpcSheetInput"
+                                                                                },
+                                                                                {
+                                                                                    "label": "A-MZ",
+                                                                                    "value": "A1:MZ1",
+                                                                                    "nested": "rpc://google-sheets@2/rpcSheetInput"
+                                                                                },
+                                                                                {
+                                                                                    "label": "A-ZZ",
+                                                                                    "value": "A1:ZZ1",
+                                                                                    "nested": "rpc://google-sheets@2/rpcSheetInput"
+                                                                                }
+                                                                            ],
+                                                                            "mappable": false,
+                                                                            "required": true
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ],
+                                                            "mappable": false,
+                                                            "required": true
+                                                        }
+                                                    ]
+                                                },
+                                                "mappable": false,
+                                                "required": true
+                                            }
+                                        ]
+                                    },
+                                    "mappable": false,
+                                    "required": true
+                                }
+                            ]
+                        },
+                        "spreadsheetId": {
+                            "mode": "chose",
+                            "path": [
+                                "CA CLIENT DOCUMENT TRACKER"
+                            ]
+                        },
+                        "sheetId": {
+                            "mode": "chose",
+                            "label": "Received Documents"
+                        },
+                        "includesHeaders": {
+                            "mode": "chose",
+                            "label": "Yes",
+                            "nested": [
+                                {
+                                    "help": "When enabled, column header names are used as stable IDs. This protects mappings when columns are added, removed, or reordered in the table. Leave it disabled if you need the module to continue working when columns are renamed (in which case, column position will be used as the ID).",
+                                    "name": "useColumnHeaders",
+                                    "type": "select",
+                                    "label": "Use column headers as IDs of the columns",
+                                    "nested": [
+                                        "rpc://google-sheets@2/rpcSheetInput"
+                                    ],
+                                    "default": false,
+                                    "options": [
+                                        {
+                                            "label": "Yes",
+                                            "value": true
+                                        },
+                                        {
+                                            "label": "No",
+                                            "value": false
+                                        }
+                                    ],
+                                    "mappable": false,
+                                    "required": true
+                                }
+                            ]
+                        },
+                        "useColumnHeaders": {
+                            "mode": "chose",
+                            "label": "Yes"
+                        },
+                        "valueInputOption": {
+                            "mode": "chose",
+                            "label": "User entered"
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "__IMTCONN__",
+                        "type": "account:google",
+                        "label": "Connection",
+                        "required": true
+                    }
+                ],
+                "expect": [
+                    {
+                        "name": "mode",
+                        "type": "select",
+                        "label": "Search Method",
+                        "default": "select",
+                        "mappable": false,
+                        "required": true,
+                        "validate": {
+                            "enum": [
+                                "select",
+                                "fromAll",
+                                "map"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "from",
+                        "type": "select",
+                        "label": "Drive",
+                        "mappable": false,
+                        "required": true,
+                        "validate": {
+                            "enum": [
+                                "drive",
+                                "share",
+                                "team"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "spreadsheetId",
+                        "type": "file",
+                        "label": "Spreadsheet Name",
+                        "mappable": false,
+                        "required": true
+                    },
+                    {
+                        "name": "sheetId",
+                        "type": "select",
+                        "label": "Sheet Name",
+                        "mappable": false,
+                        "required": true
+                    },
+                    {
+                        "name": "includesHeaders",
+                        "type": "select",
+                        "label": "Table contains headers",
+                        "default": true,
+                        "mappable": false,
+                        "required": true,
+                        "validate": {
+                            "enum": [
+                                "true",
+                                "false"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "useColumnHeaders",
+                        "type": "select",
+                        "label": "Use column headers as IDs of the columns",
+                        "default": false,
+                        "mappable": false,
+                        "required": true,
+                        "validate": {
+                            "enum": [
+                                "true",
+                                "false"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "values",
+                        "label": "Values in columns",
+                        "type": "collection",
+                        "spec": [
+                            {
+                                "name": "Client Name",
+                                "label": "Client Name (A)",
+                                "type": "text"
+                            },
+                            {
+                                "name": "Document Type",
+                                "label": "Document Type (B)",
+                                "type": "text"
+                            },
+                            {
+                                "name": "Month / Period",
+                                "label": "Month / Period (C)",
+                                "type": "text"
+                            },
+                            {
+                                "name": "Sender Email",
+                                "label": "Sender Email (D)",
+                                "type": "text"
+                            },
+                            {
+                                "name": "Status",
+                                "label": "Status (E)",
+                                "type": "text"
+                            },
+                            {
+                                "name": "File Name",
+                                "label": "File Name (F)",
+                                "type": "text"
+                            },
+                            {
+                                "name": "Received At",
+                                "label": "Received At (G)",
+                                "type": "text"
+                            }
+                        ],
+                        "metadata": [
+                            [
+                                [
+                                    "Client Name",
+                                    "Document Type",
+                                    "Month / Period",
+                                    "Sender Email",
+                                    "Status",
+                                    "File Name",
+                                    "Received At"
+                                ]
+                            ]
+                        ]
+                    },
+                    {
+                        "name": "insertUnformatted",
+                        "type": "boolean",
+                        "label": "Unformatted",
+                        "default": false,
+                        "required": true
+                    },
+                    {
+                        "name": "valueInputOption",
+                        "type": "select",
+                        "label": "Value input option",
+                        "default": "USER_ENTERED",
+                        "advanced": true,
+                        "editable": true,
+                        "required": true,
+                        "validate": {
+                            "enum": [
+                                "USER_ENTERED",
+                                "RAW"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "insertDataOption",
+                        "type": "select",
+                        "label": "Insert data option",
+                        "default": "INSERT_ROWS",
+                        "advanced": true,
+                        "editable": true,
+                        "validate": {
+                            "enum": [
+                                "INSERT_ROWS",
+                                "OVERWRITE"
+                            ]
+                        }
+                    }
+                ]
+            }
+        }
+    ],
+    "metadata": {
+        "instant": false,
+        "version": 1,
+        "scenario": {
+            "roundtrips": 1,
+            "maxErrors": 3,
+            "autoCommit": true,
+            "autoCommitTriggerLast": true,
+            "sequential": false,
+            "slots": null,
+            "confidential": false,
+            "dataloss": false,
+            "dlq": false,
+            "freshVariables": false
+        },
+        "designer": {
+            "orphans": []
+        },
+        "zone": "eu1.make.com",
+        "notes": []
+    }
+}
